@@ -5,7 +5,6 @@ import java.awt.Image;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.security.SecureRandom;
-import java.util.Random;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -14,7 +13,7 @@ import javax.swing.JPanel;
 
 public class Board extends JPanel {
 	private static final long serialVersionUID = 6195235521361212179L;
-	
+
 	private static final int numImages = 13;
     private static final int cellSize = 15;
 
@@ -128,13 +127,12 @@ public class Board extends JPanel {
         for (int offset : offsets) {
             int cell = j + offset;
 
-            // Skip invalid left-side neighbors
-            if ((offset == -cols - 1 || offset == -1 || offset == +cols - 1) && currentCol == 0)
-                continue;
+            boolean skipLeft = (offset == -cols - 1 || offset == -1 || offset == +cols - 1) && currentCol == 0;
+            boolean skipRight = (offset == -cols + 1 || offset == +cols + 1 || offset == +1) && currentCol == cols - 1;
 
-            // Skip invalid right-side neighbors
-            if ((offset == -cols + 1 || offset == +cols + 1 || offset == +1) && currentCol == cols - 1)
+            if (skipLeft || skipRight) {
                 continue;
+            }
 
             if (cell >= 0 && cell < allCells && field[cell] > mineCell) {
                 field[cell] -= coverForCell;
@@ -144,118 +142,116 @@ public class Board extends JPanel {
             }
         }
     }
-    public void paint(Graphics g) {
 
-        int cell = 0;
-        int uncover = 0;
-
-
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < cols; j++) {
-
-                cell = field[(i * cols) + j];
-
-                if (inGame && cell == mineCell)
-                    inGame = false;
-
-                if (!inGame) {
-                    if (cell == coveredMineCell) {
-                        cell = drawMine;
-                    } else if (cell == markedMineCell) {
-                        cell = drawMark;
-                    } else if (cell > coveredMineCell) {
-                        cell = drawWrongMark;
-                    } else if (cell > mineCell) {
-                        cell = drawCover;
-                    }
-
-
-                } else {
-                    if (cell > coveredMineCell)
-                        cell = drawMark;
-                    else if (cell > mineCell) {
-                        cell = drawCover;
-                        uncover++;
-                    }
-                }
-
-                g.drawImage(img[cell], (j * cellSize),
-                    (i * cellSize), this);
-            }
+    private int resolveCellDrawing(int cell) {
+        if (!inGame) {
+            if (cell == coveredMineCell) return drawMine;
+            if (cell == markedMineCell) return drawMark;
+            if (cell > coveredMineCell) return drawWrongMark;
+            if (cell > mineCell) return drawCover;
+        } else {
+            if (cell > coveredMineCell) return drawMark;
+            if (cell > mineCell) return drawCover;
         }
-
-
+        return cell;
+    }
+    private void updateGameStatus(int uncover) {
         if (uncover == 0 && inGame) {
             inGame = false;
             statusbar.setText("Game won");
-        } else if (!inGame)
+        } else if (!inGame) {
             statusbar.setText("Game lost");
+        }
+    }
+    @Override
+    public void paint(Graphics g) {
+        int cell;
+        int uncover = 0;
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int index = (i * cols) + j;
+                cell = field[index];
+
+                if (inGame && cell == mineCell) {
+                    inGame = false;
+                }
+
+                cell = resolveCellDrawing(cell);
+                if (cell == drawCover && inGame) {
+                    uncover++;
+                }
+
+                g.drawImage(img[cell], (j * cellSize), (i * cellSize), this);
+            }
+        }
+
+        updateGameStatus(uncover);
     }
 
 
     class MinesAdapter extends MouseAdapter {
+        @Override
         public void mousePressed(MouseEvent e) {
-
             int x = e.getX();
             int y = e.getY();
-
             int cCol = x / cellSize;
             int cRow = y / cellSize;
-
-            boolean rep = false;
-
 
             if (!inGame) {
                 newGame();
                 repaint();
+                return;
             }
 
+            if (x >= cols * cellSize || y >= rows * cellSize) return;
 
-            if ((x < cols * cellSize) && (y < rows * cellSize)) {
+            boolean rep = false;
+            int index = (cRow * cols) + cCol;
 
-                if (e.getButton() == MouseEvent.BUTTON3) {
+            if (e.getButton() == MouseEvent.BUTTON3) {
+                rep = handleRightClick(index);
+            } else {
+                rep = handleLeftClick(index);
+            }
 
-                    if (field[(cRow * cols) + cCol] > mineCell) {
-                        rep = true;
+            if (rep) repaint();
+        }
+        private boolean handleRightClick(int index) {
+            if (field[index] <= mineCell) return false;
 
-                        if (field[(cRow * cols) + cCol] <= coveredMineCell) {
-                            if (minesLeft > 0) {
-                                field[(cRow * cols) + cCol] += markForCell;
-                                minesLeft--;
-                                statusbar.setText(Integer.toString(minesLeft));
-                            } else
-                                statusbar.setText("No marks left");
-                        } else {
-
-                            field[(cRow * cols) + cCol] -= markForCell;
-                            minesLeft++;
-                            statusbar.setText(Integer.toString(minesLeft));
-                        }
-                    }
-
+            if (field[index] <= coveredMineCell) {
+                if (minesLeft > 0) {
+                    field[index] += markForCell;
+                    minesLeft--;
+                    statusbar.setText(Integer.toString(minesLeft));
                 } else {
+                    statusbar.setText("No marks left");
+                }
+            } else {
+                field[index] -= markForCell;
+                minesLeft++;
+                statusbar.setText(Integer.toString(minesLeft));
+            }
 
-                    if (field[(cRow * cols) + cCol] > coveredMineCell) {
-                        return;
-                    }
+            return true;
+        }
+        private boolean handleLeftClick(int index) {
+            if (field[index] > coveredMineCell) return false;
 
-                    if ((field[(cRow * cols) + cCol] > mineCell) &&
-                        (field[(cRow * cols) + cCol] < markedMineCell)) {
+            if (field[index] > mineCell && field[index] < markedMineCell) {
+                field[index] -= coverForCell;
 
-                        field[(cRow * cols) + cCol] -= coverForCell;
-                        rep = true;
-
-                        if (field[(cRow * cols) + cCol] == mineCell)
-                            inGame = false;
-                        if (field[(cRow * cols) + cCol] == emptyCell)
-                            findEmptyCells((cRow * cols) + cCol);
-                    }
+                if (field[index] == mineCell) {
+                    inGame = false;
+                } else if (field[index] == emptyCell) {
+                    findEmptyCells(index);
                 }
 
-                if (rep)
-                    repaint();
-
+                return true;
             }
+
+            return false;
         }
     }
 }

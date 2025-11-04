@@ -1,1 +1,1 @@
- 2javaX…hr#JeuMines/src/mines/mines/Board.java
+ 2javaXhr#JeuMines/src/mines/mines/Board.java
