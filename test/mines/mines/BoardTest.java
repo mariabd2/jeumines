@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BoardTest {
+class BoardTest {
 
     private Board board;
     private JLabel statusbar;
@@ -19,21 +19,21 @@ public class BoardTest {
     }
 
     @Test
-    public void testNewGameInitializesField() {
+    void testNewGameInitializesField() {
         board.newGame();
         int[] field = getPrivateField();
         assertEquals(256, field.length); // 16x16 grid
     }
 
     @Test
-    public void testMineCountAfterNewGame() {
+    void testMineCountAfterNewGame() {
         board.newGame();
         int mineCount = countMines();
         assertEquals(40, mineCount);
     }
 
     @Test
-    public void testFindEmptyCellsDoesNotCrash() {
+    void testFindEmptyCellsDoesNotCrash() {
         board.newGame();
         assertDoesNotThrow(() -> board.findEmptyCells(0));
     }
