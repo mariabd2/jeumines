@@ -1,12 +1,12 @@
 
 java.is_autoscanfalse-
-%java.analysis.main.success.size_chars8466
+%java.analysis.main.success.size_chars8562
 java.module_count1%
 java.dependency.spring-bootabsent0
-+java.analysis.main.success.type_error_count0%
-text.sensor_time_ms_community1080
++java.analysis.main.success.type_error_count0$
+text.sensor_time_ms_community802
 text.analyzed_files_count2*
-"java.analysis.main.success.time_ms1534
+"java.analysis.main.success.time_ms1059
 java.language.version8%
  text.analyzed_hidden_files_count0)
 java.scanner_appIntellij Sonar plugin&

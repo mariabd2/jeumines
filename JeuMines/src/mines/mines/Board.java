@@ -12,22 +12,21 @@ import javax.swing.JPanel;
 
 
 public class Board extends JPanel {
-	private static final long serialVersionUID = 6195235521361212179L;
 
-	private static final int numImages = 13;
-    private static final int cellSize = 15;
+    private static final int NUM_IMAGES = 13;
+    private static final int CELL_SIZE = 15;
 
-    private static final int coverForCell = 10;
-    private static final int markForCell = 10;
-    private static final int emptyCell  = 0;
-    private static final int mineCell  = 9;
-    private static final int coveredMineCell  = mineCell + coverForCell;
-    private static final int markedMineCell  = coveredMineCell + markForCell;
+    private static final int COVER_FOR_CELL = 10;
+    private static final int MARK_FOR_CELL = 10;
+    private static final int EMPTY_CELL = 0;
+    private static final int MINE_CELL = 9;
+    private static final int COVERED_MINE_CELL = MINE_CELL + COVER_FOR_CELL;
+    private static final int MARKED_MINE_CELL = COVERED_MINE_CELL + MARK_FOR_CELL;
 
-    private static final int drawMine  = 9;
-    private static final int drawCover  = 10;
-    private static final int drawMark  = 11;
-    private static final int drawWrongMark  = 12;
+    private static final int DRAW_MINE = 9;
+    private static final int DRAW_COVER = 10;
+    private static final int DRAW_MARK = 11;
+    private static final int DRAW_WRONG_MARK = 12;
 
     private int[] field;
     private boolean inGame;
@@ -44,9 +43,9 @@ public class Board extends JPanel {
 
         this.statusbar = statusbar;
 
-        img = new Image[numImages];
+        img = new Image[NUM_IMAGES];
 
-        for (int i = 0; i < numImages; i++) {
+        for (int i = 0; i < NUM_IMAGES; i++) {
             img[i] = (new ImageIcon("C:\\Users\\win\\Downloads\\JeuMines-20251011T192442Z-1-001\\JeuMines\\images\\" + i + ".gif")).getImage();
         }
 
@@ -64,7 +63,7 @@ public class Board extends JPanel {
     }
     private void initializeField() {
         for (int i = 0; i < allCells; i++) {
-            field[i] = coverForCell;
+            field[i] = COVER_FOR_CELL;
         }
     }
     private void updateStatusBar() {
@@ -75,9 +74,9 @@ public class Board extends JPanel {
         while (placed < mines) {
             int position = random.nextInt(allCells);
 
-            if (position >= allCells || field[position] == coveredMineCell) continue;
+            if (position >= allCells || field[position] == COVERED_MINE_CELL) continue;
 
-            field[position] = coveredMineCell;
+            field[position] = COVERED_MINE_CELL;
             placed++;
 
             updateAdjacentCells(position);
@@ -99,7 +98,7 @@ public class Board extends JPanel {
 
             if (skipLeft || skipRight) continue;
 
-            if (cell >= 0 && cell < allCells && field[cell] != coveredMineCell) {
+            if (cell >= 0 && cell < allCells && field[cell] != COVERED_MINE_CELL) {
                 field[cell] += 1;
             }
         }
@@ -134,9 +133,9 @@ public class Board extends JPanel {
                 continue;
             }
 
-            if (cell >= 0 && cell < allCells && field[cell] > mineCell) {
-                field[cell] -= coverForCell;
-                if (field[cell] == emptyCell) {
+            if (cell >= 0 && cell < allCells && field[cell] > MINE_CELL) {
+                field[cell] -= COVER_FOR_CELL;
+                if (field[cell] == EMPTY_CELL) {
                     findEmptyCells(cell);
                 }
             }
@@ -145,13 +144,13 @@ public class Board extends JPanel {
 
     private int resolveCellDrawing(int cell) {
         if (!inGame) {
-            if (cell == coveredMineCell) return drawMine;
-            if (cell == markedMineCell) return drawMark;
-            if (cell > coveredMineCell) return drawWrongMark;
-            if (cell > mineCell) return drawCover;
+            if (cell == COVERED_MINE_CELL) return DRAW_MINE;
+            if (cell == MARKED_MINE_CELL) return DRAW_MARK;
+            if (cell > COVERED_MINE_CELL) return DRAW_WRONG_MARK;
+            if (cell > MINE_CELL) return DRAW_COVER;
         } else {
-            if (cell > coveredMineCell) return drawMark;
-            if (cell > mineCell) return drawCover;
+            if (cell > COVERED_MINE_CELL) return DRAW_MARK;
+            if (cell > MINE_CELL) return DRAW_COVER;
         }
         return cell;
     }
@@ -173,16 +172,16 @@ public class Board extends JPanel {
                 int index = (i * cols) + j;
                 cell = field[index];
 
-                if (inGame && cell == mineCell) {
+                if (inGame && cell == MINE_CELL) {
                     inGame = false;
                 }
 
                 cell = resolveCellDrawing(cell);
-                if (cell == drawCover && inGame) {
+                if (cell == DRAW_COVER && inGame) {
                     uncover++;
                 }
 
-                g.drawImage(img[cell], (j * cellSize), (i * cellSize), this);
+                g.drawImage(img[cell], (j * CELL_SIZE), (i * CELL_SIZE), this);
             }
         }
 
@@ -195,8 +194,8 @@ public class Board extends JPanel {
         public void mousePressed(MouseEvent e) {
             int x = e.getX();
             int y = e.getY();
-            int cCol = x / cellSize;
-            int cRow = y / cellSize;
+            int cCol = x / CELL_SIZE;
+            int cRow = y / CELL_SIZE;
 
             if (!inGame) {
                 newGame();
@@ -204,7 +203,7 @@ public class Board extends JPanel {
                 return;
             }
 
-            if (x >= cols * cellSize || y >= rows * cellSize) return;
+            if (x >= cols * CELL_SIZE || y >= rows * CELL_SIZE) return;
 
             boolean rep = false;
             int index = (cRow * cols) + cCol;
@@ -218,18 +217,18 @@ public class Board extends JPanel {
             if (rep) repaint();
         }
         private boolean handleRightClick(int index) {
-            if (field[index] <= mineCell) return false;
+            if (field[index] <= MINE_CELL) return false;
 
-            if (field[index] <= coveredMineCell) {
+            if (field[index] <= COVERED_MINE_CELL) {
                 if (minesLeft > 0) {
-                    field[index] += markForCell;
+                    field[index] += MARK_FOR_CELL;
                     minesLeft--;
                     statusbar.setText(Integer.toString(minesLeft));
                 } else {
                     statusbar.setText("No marks left");
                 }
             } else {
-                field[index] -= markForCell;
+                field[index] -= MARK_FOR_CELL;
                 minesLeft++;
                 statusbar.setText(Integer.toString(minesLeft));
             }
@@ -237,14 +236,14 @@ public class Board extends JPanel {
             return true;
         }
         private boolean handleLeftClick(int index) {
-            if (field[index] > coveredMineCell) return false;
+            if (field[index] > COVERED_MINE_CELL) return false;
 
-            if (field[index] > mineCell && field[index] < markedMineCell) {
-                field[index] -= coverForCell;
+            if (field[index] > MINE_CELL && field[index] < MARKED_MINE_CELL) {
+                field[index] -= COVER_FOR_CELL;
 
-                if (field[index] == mineCell) {
+                if (field[index] == MINE_CELL) {
                     inGame = false;
-                } else if (field[index] == emptyCell) {
+                } else if (field[index] == EMPTY_CELL) {
                     findEmptyCells(index);
                 }
 
