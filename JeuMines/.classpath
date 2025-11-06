@@ -4,4 +4,8 @@
 	<classpathentry kind="src" path="images"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
 	<classpathentry kind="output" path="bin"/>
+	<classpathentry kind="lib" path="lib/junit-jupiter-api.jar"/>
+    <classpathentry kind="lib" path="lib/junit-jupiter-engine.jar"/>
+    <classpathentry kind="lib" path="lib/jacocoagent.jar"/>
+    <classpathentry kind="lib" path="lib/jacococli.jar"/>
 </classpath>

@@ -35,4 +35,7 @@ public class Mines extends JFrame {
     public static void main(String[] args) {
         new Mines();
     }
+
+    //java -jar "JeuMines\lib\jacococli.jar" report jacoco.exec --classfiles "out/production/JeuMines-20251011T192442Z-1-001" --sourcefiles "JeuMines/src" --html "coverage-report"
+    // java -jar "JeuMines\lib\jacococli.jar" report jacoco.exec --classfiles "out/production/JeuMines-20251011T192442Z-1-001" --sourcefiles "JeuMines/src" --html "coverage-report"
 }

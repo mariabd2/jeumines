@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jacococli">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/../jacoco-0.8.14/lib/jacococli.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

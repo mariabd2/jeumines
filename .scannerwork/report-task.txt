@@ -2,5 +2,5 @@ projectKey=jeuMines
 serverUrl=http://localhost:9000
 serverVersion=25.10.0.114319
 dashboardUrl=http://localhost:9000/dashboard?id=jeuMines
-ceTaskId=194cc477-e337-4a92-80e3-dd591c1654f5
-ceTaskUrl=http://localhost:9000/api/ce/task?id=194cc477-e337-4a92-80e3-dd591c1654f5
+ceTaskId=4fb2754c-ae0b-400b-84b5-c5334becd8b0
+ceTaskUrl=http://localhost:9000/api/ce/task?id=4fb2754c-ae0b-400b-84b5-c5334becd8b0
