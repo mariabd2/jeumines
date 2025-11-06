@@ -68,4 +68,15 @@ class MinesTest {
     void testMainMethodCoverage() throws Exception {
         SwingUtilities.invokeAndWait(() -> Mines.main(new String[]{}));
     }
+    @Test
+    void testMinesConstructorCoverage() throws Exception {
+        SwingUtilities.invokeAndWait(() -> {
+            Mines mines = new Mines();
+            assertEquals("Minesweeper", mines.getTitle());
+            assertFalse(mines.isResizable());
+            assertTrue(mines.isVisible());
+            mines.dispose();
+        });
+    }
+
 }

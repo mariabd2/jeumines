@@ -5,6 +5,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.swing.JLabel;
 
+import java.awt.event.MouseEvent;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class BoardTest {
@@ -172,5 +174,125 @@ class BoardTest {
     @Test
     void testMainMethodRunsWithoutError() {
         assertDoesNotThrow(() -> Mines.main(new String[]{}));
+    }
+    @Test
+    void testHandleRightClickMarksAndUnmarksCell() throws Exception {
+        board.newGame();
+        int[] field = getPrivateField();
+        int index = 50;
+        field[index] = 10; // COVER_FOR_CELL
+
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        var method = adapterClass.getDeclaredMethod("handleRightClick", int.class);
+        method.setAccessible(true);
+
+        boolean marked = (boolean) method.invoke(adapter, index);
+        assertTrue(marked);
+        assertEquals(20, field[index]); // MARKED_MINE_CELL
+
+        boolean unmarked = (boolean) method.invoke(adapter, index);
+        assertTrue(unmarked);
+        assertEquals(10, field[index]); // back to COVER_FOR_CELL
+    }
+
+    @Test
+    void testHandleLeftClickUncoversCell() throws Exception {
+        board.newGame();
+        int[] field = getPrivateField();
+        int index = 60;
+        field[index] = 11; // COVER_FOR_CELL + 1
+
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        var method = adapterClass.getDeclaredMethod("handleLeftClick", int.class);
+        method.setAccessible(true);
+
+        boolean uncovered = (boolean) method.invoke(adapter, index);
+        assertTrue(uncovered);
+        assertEquals(1, field[index]); // uncovered value
+    }
+
+    @Test
+    void testMousePressedTriggersNewGameOnLoss() throws Exception {
+        board.newGame();
+        var inGameField = Board.class.getDeclaredField("inGame");
+        inGameField.setAccessible(true);
+        inGameField.set(board, false); // simulate game over
+
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        MouseEvent event = new MouseEvent(board, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, 10, 10, 1, false, MouseEvent.BUTTON1);
+        var method = adapterClass.getDeclaredMethod("mousePressed", MouseEvent.class);
+        method.setAccessible(true);
+        method.invoke(adapter, event);
+
+        assertTrue((boolean) inGameField.get(board)); // new game started
+    }
+    @Test
+    void testResolveCellDrawingWhenNotInGame() throws Exception {
+        var method = Board.class.getDeclaredMethod("resolveCellDrawing", int.class);
+        method.setAccessible(true);
+
+        var inGameField = Board.class.getDeclaredField("inGame");
+        inGameField.setAccessible(true);
+        inGameField.set(board, false); // simulate game over
+
+        assertEquals(9, method.invoke(board, 19)); // COVERED_MINE_CELL → DRAW_MINE
+        assertEquals(11, method.invoke(board, 29)); // MARKED_MINE_CELL → DRAW_MARK
+        assertEquals(12, method.invoke(board, 30)); // > COVERED_MINE_CELL → DRAW_WRONG_MARK
+        assertEquals(10, method.invoke(board, 10)); // > MINE_CELL → DRAW_COVER
+    }
+    @Test
+    void testMousePressedOutsideBoardBounds() throws Exception {
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        MouseEvent event = new MouseEvent(board, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, 300, 300, 1, false, MouseEvent.BUTTON1);
+        var method = adapterClass.getDeclaredMethod("mousePressed", MouseEvent.class);
+        method.setAccessible(true);
+
+        method.invoke(adapter, event); // should return early, no crash
+    }
+
+    @Test
+    void testMousePressedTriggersNewGameWhenNotInGame() throws Exception {
+        var inGameField = Board.class.getDeclaredField("inGame");
+        inGameField.setAccessible(true);
+        inGameField.set(board, false); // simulate game over
+
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        MouseEvent event = new MouseEvent(board, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, 10, 10, 1, false, MouseEvent.BUTTON1);
+        var method = adapterClass.getDeclaredMethod("mousePressed", MouseEvent.class);
+        method.setAccessible(true);
+
+        method.invoke(adapter, event); // should call newGame()
+        assertTrue((boolean) inGameField.get(board)); // game restarted
+    }
+
+    @Test
+    void testMousePressedHandlesRightClick() throws Exception {
+        board.newGame();
+        int[] field = getPrivateField();
+        int index = 50;
+        field[index] = 10; // COVER_FOR_CELL
+
+        var adapterClass = Class.forName("mines.mines.Board$MinesAdapter");
+        var adapter = adapterClass.getDeclaredConstructor(board.getClass()).newInstance(board);
+
+        int x = (index % 16) * 15;
+        int y = (index / 16) * 15;
+
+        MouseEvent event = new MouseEvent(board, MouseEvent.MOUSE_PRESSED, System.currentTimeMillis(), 0, x, y, 1, false, MouseEvent.BUTTON3);
+        var method = adapterClass.getDeclaredMethod("mousePressed", MouseEvent.class);
+        method.setAccessible(true);
+
+        method.invoke(adapter, event);
+        assertEquals(20, field[index]); // MARKED_MINE_CELL
     }
 }
